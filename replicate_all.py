@@ -9,19 +9,19 @@ class DBReplicator:
         pass
 
     def main(self):
-        self.get_schemas()
-        # for object in objects:
-        #     self.write_config_file(object)
-        #     status_code = self.execute_replicate_task()
+        schemas = self.get_schemas()
+        schema_list = ','.join(schemas)
+        self.write_config_file(schema_list)
+        status_code = self.execute_replicate_task()
 
     def get_schemas(self):
-        try: 
+        try:
             output = subprocess.check_output(
                 "/opt/vertica/bin/vsql -CAtX -c 'SELECT schema_name FROM schemata WHERE NOT is_system_schema;'",
                 shell=True
             )
-            ascii_output = output.decode('ascii') 
-            print(ascii_output) 
+            schemas = output.decode('ascii').splitlines()
+            return schemas
         except Exception as e:
             print(str(e))
 
@@ -30,13 +30,12 @@ class DBReplicator:
         with open('db_replicate.ini', 'w') as configfile:
             config.write(configfile)
 
-    def generate_ini(self, object):
+    def generate_ini(self, schema_list):
         config = configparser.ConfigParser()
         config.optionxform = str
         config.read('db_replicate.ini')
-        misc = config['Misc']['objects']
-        config['Misc']['objects'] = object
-        misc = config['Misc']['objects']
+        config['Misc'].pop('objects', None)
+        config['Misc']['includeObjects'] = schema_list
         return config
 
     def execute_replicate_task(self):
