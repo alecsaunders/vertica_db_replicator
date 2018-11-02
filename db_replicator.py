@@ -1,4 +1,5 @@
 import os
+import sys
 import subprocess
 import argparse
 import configparser
@@ -48,7 +49,7 @@ class DBReplicator:
         return config
 
     def execute_replicate_task(self):
-        return os.system('/opt/vertica/bin/vbr -t replicate -c db_replicate.ini')
+        return os.system('/opt/vertica/bin/vbr -t replicate -c ' + self.config_file)
 
 
 if __name__ == '__main__':
@@ -73,6 +74,7 @@ if __name__ == '__main__':
     if not start_with_all_schemas and not include:
         print("Must specify all schemas with --all-schemas or specify individual objects with --include")
         parser.print_help()
+        sys.exit(0)
 
     dbr = DBReplicator(config_file, start_with_all_schemas, include, exclude)
     dbr.main()
