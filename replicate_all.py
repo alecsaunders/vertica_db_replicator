@@ -1,4 +1,5 @@
 import os
+import subprocess
 import argparse
 import configparser
 
@@ -8,10 +9,21 @@ class DBReplicator:
         pass
 
     def main(self):
-        objects = ['public', 'store', 'online_sales']
+        self.get_schemas()
         for object in objects:
             self.write_config_file(object)
-            # status_code = self.execute_replicate_task()
+            status_code = self.execute_replicate_task()
+
+    def get_schemas():
+        try:
+            proc = subprocess.Popen(
+                ['/opt/vertica/bin/vsql', '-CAtX', '-c', "SELECT schema_name FROM schemata WHERE NOT is_system_schema;"],
+                stdout=subprocess.PIPE,
+                shell=True
+            )
+            (out, err) = proc.communicate()
+            print('Program output: ' + str(out))
+
 
     def write_config_file(self, object):
         config = self.generate_ini(object)
