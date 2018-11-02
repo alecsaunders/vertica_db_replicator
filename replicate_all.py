@@ -10,9 +10,9 @@ class DBReplicator:
 
     def main(self):
         self.get_schemas()
-        for object in objects:
-            self.write_config_file(object)
-            status_code = self.execute_replicate_task()
+        # for object in objects:
+        #     self.write_config_file(object)
+        #     status_code = self.execute_replicate_task()
 
     def get_schemas():
         try:
