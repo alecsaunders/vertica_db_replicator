@@ -14,16 +14,16 @@ class DBReplicator:
         #     self.write_config_file(object)
         #     status_code = self.execute_replicate_task()
 
-    def get_schemas():
-        try:
-            proc = subprocess.Popen(
-                ['/opt/vertica/bin/vsql', '-CAtX', '-c', "SELECT schema_name FROM schemata WHERE NOT is_system_schema;"],
-                stdout=subprocess.PIPE,
+    def get_schemas(self):
+        try: 
+            output = subprocess.check_output(
+                "/opt/vertica/bin/vsql -CAtX -c 'SELECT schema_name FROM schemata WHERE NOT is_system_schema;'",
                 shell=True
             )
-            (out, err) = proc.communicate()
-            print('Program output: ' + str(out))
-
+            ascii_output = output.decode('ascii') 
+            print(ascii_output) 
+        except Exception as e:
+            print(str(e))
 
     def write_config_file(self, object):
         config = self.generate_ini(object)
