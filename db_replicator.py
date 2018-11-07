@@ -1,5 +1,6 @@
 import os
 import subprocess
+import logging
 import argparse
 import configparser
 
@@ -20,7 +21,7 @@ class DBReplicator:
             schema_list = ''
         include_list = schema_list + self.include if self.include else schema_list
         self.write_config_file(include_list, self.exclude)
-        status_code = self.execute_replicate_task()
+        # status_code = self.execute_replicate_task()
 
     def get_schemas(self):
         try:
@@ -52,6 +53,12 @@ class DBReplicator:
 
 
 if __name__ == '__main__':
+    logging.basicConfig(
+        format='[%(asctime)s] - [%(levelname)s]: %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S',
+        level=logging.INFO
+    )
+
     parser = argparse.ArgumentParser(
         description="Replicate full database",
         epilog=(
@@ -70,7 +77,15 @@ if __name__ == '__main__':
     include = args.include
     exclude = args.exclude if args.exclude else ''
 
+    if start_with_all_schemas:
+        logging.info('Include all schemas')
+    if include:
+        logging.info('Include objects: {0}'.format(include))
+    if exclude:
+        logging.info('Exclude objects: {0}'.format(exclude))
+
     if not start_with_all_schemas and not include:
+        logging.error('No objects specified')
         print("Must specify all schemas with --all-schemas or specify individual objects with --include")
         parser.print_help()
 
