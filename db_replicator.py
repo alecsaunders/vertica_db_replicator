@@ -30,12 +30,17 @@ class DBReplicator:
         try:
             output = subprocess.check_output(
                 "/opt/vertica/bin/vsql -CAtX -c 'SELECT schema_name FROM schemata WHERE NOT is_system_schema ORDER BY schema_name;'",
-                shell=True
+                stderr=subprocess.STDOUT,
+                shell=True,
             )
             schemas = output.decode('ascii').splitlines()
             return schemas
+        except subprocess.CalledProcessError as sub_exc:
+            logging.error("vsql command to get schemas failed with exit status {0}: {1}".format(sub_exc.returncode, sub_exc.output.decode('UTF-8').replace('\n', '').replace('\t', ' ')))
+            sys.exit(sub_exc.returncode)
         except Exception as e:
-            print(str(e))
+            logging.error("Failed to get schemas: {0}".format(str(e)))
+            sys.exit(1)
 
     def write_config_file(self, includeObjects, excludeObjects):
         config = self.generate_ini(includeObjects, excludeObjects)
