@@ -71,7 +71,11 @@ if __name__ == '__main__':
     parser.add_argument('-a', '--all-schemas', action='store_true', help='Starts with all schemas for the includeObjects parameter, then applies the explicit include and exclude objects. When this option is specified there is no reason to specify a schema with the --include option; however, an individual table can be listed if that table is in a schema specified with the --exclude option (e.g. if the store schema is excluded, but the store.store_sales_fact table is included)')
     parser.add_argument('-i', '--include', metavar='', help='Optional (if --all-schemas is used): Objects to include (existing values in the config file will be overridden)')
     parser.add_argument('-x', '--exclude', metavar='', help='Optional: Objects to exclude (existing values in the config file will be overridden)')
-    args = parser.parse_args()
+    try:
+        args = parser.parse_args()
+    except:
+        logging.error('Error parsing arguments')
+        sys.exit(1)
 
     start_with_all_schemas = args.all_schemas
     config_file = args.config_file
