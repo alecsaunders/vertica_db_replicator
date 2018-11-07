@@ -60,12 +60,12 @@ class DBReplicator:
     def execute_replicate_task(self):
         try:
             subprocess.check_output(
-                '/opt/vertica/bin/vbr -t replicate -c db_replicate.ini',
+                '/opt/vertica/bin/vbr -t replicate -c {0}'.format(self.config_file),
                 stderr=subprocess.STDOUT,
                 shell=True
             )
         except subprocess.CalledProcessError as sub_exc:
-            logging.error("vbr tool failed with code {0}: {1}".format(sub_exc.returncode, sub_exc.output.decode('UTF-8').replace('\n', '')))
+            logging.error("vbr tool failed with code {0}: {1}".format(sub_exc.returncode, sub_exc.output.decode('UTF-8').replace('\n', ' ')))
         except Exception as e:
             logging.error("Failed to execute vbr replicate tool: [{0}] - {1}".format(type(e), str(e)))
             sys.exit(1)
@@ -93,6 +93,7 @@ if __name__ == '__main__':
     try:
         args = parser.parse_args()
     except:
+        parser.print_help()
         logging.error('Error parsing arguments')
         sys.exit(1)
 
