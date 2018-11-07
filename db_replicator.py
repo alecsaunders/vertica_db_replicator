@@ -8,6 +8,7 @@ import configparser
 
 class DBReplicator:
     def __init__(self, config_file, start_with_all_schemas, include, exclude):
+        logging.debug('Initializing DBReplicator object')
         self.config_file = config_file
         self.start_with_all_schemas = start_with_all_schemas
         self.include = include
@@ -21,6 +22,7 @@ class DBReplicator:
         else:
             schema_list = ''
         include_list = schema_list + self.include if self.include else schema_list
+        logging.debug("Include Objects list: {0}".format(include_list))
         self.write_config_file(include_list, self.exclude)
         status_code = self.execute_replicate_task()
 
@@ -39,6 +41,7 @@ class DBReplicator:
         config = self.generate_ini(includeObjects, excludeObjects)
         with open(self.config_file, 'w') as configfile:
             config.write(configfile)
+            logging.info("Config file successfully overridden")
 
     def generate_ini(self, includeObjects, excludeObjects):
         config = configparser.ConfigParser()
@@ -71,11 +74,15 @@ if __name__ == '__main__':
     parser.add_argument('-a', '--all-schemas', action='store_true', help='Starts with all schemas for the includeObjects parameter, then applies the explicit include and exclude objects. When this option is specified there is no reason to specify a schema with the --include option; however, an individual table can be listed if that table is in a schema specified with the --exclude option (e.g. if the store schema is excluded, but the store.store_sales_fact table is included)')
     parser.add_argument('-i', '--include', metavar='', help='Optional (if --all-schemas is used): Objects to include (existing values in the config file will be overridden)')
     parser.add_argument('-x', '--exclude', metavar='', help='Optional: Objects to exclude (existing values in the config file will be overridden)')
+    parser.add_argument('-L', '--loglevel', metavar='', choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], type=str.upper, help='Log level: DEBUG, INFO, WARNING, ERROR, or CRITICAL')
     try:
         args = parser.parse_args()
     except:
         logging.error('Error parsing arguments')
         sys.exit(1)
+
+    loglevel_str = args.loglevel.upper() if args.loglevel else "INFO"
+    logging.getLogger().setLevel(logging.getLevelName(loglevel_str))
 
     start_with_all_schemas = args.all_schemas
     config_file = args.config_file
