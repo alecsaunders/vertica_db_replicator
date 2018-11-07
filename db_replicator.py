@@ -1,4 +1,5 @@
 import os
+import sys
 import subprocess
 import logging
 import argparse
@@ -21,7 +22,7 @@ class DBReplicator:
             schema_list = ''
         include_list = schema_list + self.include if self.include else schema_list
         self.write_config_file(include_list, self.exclude)
-        # status_code = self.execute_replicate_task()
+        status_code = self.execute_replicate_task()
 
     def get_schemas(self):
         try:
@@ -88,6 +89,7 @@ if __name__ == '__main__':
         logging.error('No objects specified')
         print("Must specify all schemas with --all-schemas or specify individual objects with --include")
         parser.print_help()
+        sys.exit(0)
 
     dbr = DBReplicator(config_file, start_with_all_schemas, include, exclude)
     dbr.main()
