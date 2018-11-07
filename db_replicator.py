@@ -24,7 +24,7 @@ class DBReplicator:
         include_list = schema_list + self.include if self.include else schema_list
         logging.debug("Include Objects list: {0}".format(include_list))
         self.write_config_file(include_list, self.exclude)
-        status_code = self.execute_replicate_task()
+        self.execute_replicate_task()
 
     def get_schemas(self):
         try:
@@ -58,7 +58,17 @@ class DBReplicator:
         return config
 
     def execute_replicate_task(self):
-        return os.system('/opt/vertica/bin/vbr -t replicate -c db_replicate.ini')
+        try:
+            subprocess.check_output(
+                '/opt/vertica/bin/vbr -t replicate -c db_replicate.ini',
+                stderr=subprocess.STDOUT,
+                shell=True
+            )
+        except subprocess.CalledProcessError as sub_exc:
+            logging.error("vbr tool failed with code {0}: {1}".format(sub_exc.returncode, sub_exc.output.decode('UTF-8').replace('\n', '')))
+        except Exception as e:
+            logging.error("Failed to execute vbr replicate tool: [{0}] - {1}".format(type(e), str(e)))
+            sys.exit(1)
 
 
 if __name__ == '__main__':
